@@ -8,7 +8,7 @@ const offsetUppercase = 10;
 const offsetLowercase = 36;
 const stringEncodedLength = 27;
 
-fn fastEncode(dest: *[27]u8, source: []const u8) []const u8 {
+pub fn fastEncode(dest: *[27]u8, source: *const [20]u8) []const u8 {
     const srcBase = 4294967296;
     const dstBase = 62;
     std.debug.assert(source.len == 20);
@@ -57,7 +57,7 @@ fn base62Value(digit: u8) u8 {
     };
 }
 
-fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
+pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
     const srcBase = 62;
     const dstBase = 4294967296;
 
@@ -102,7 +102,6 @@ fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
     std.mem.copy(u8, dest[0..n], zero[0..n]);
     return dest[0..20];
 }
-
 test "encodeBase62" {
     var decoded: [20]u8 = undefined;
     //decodeBase62(&decoded, encoded);
@@ -121,6 +120,6 @@ test "encodeBase62" {
     var outbuf: [27]u8 = undefined;
     var toEnc = try std.fmt.hexToBytes(&outbuf, "0669F7EFB5A1CD34B5F99D1154FB6853345C9735");
     var outEncBuf: [27]u8 = undefined;
-    const outEnc = fastEncode(&outEncBuf, toEnc);
+    const outEnc = fastEncode(&outEncBuf, toEnc[0..20]);
     std.debug.print("enc[{s}]\n", .{outEnc});
 }

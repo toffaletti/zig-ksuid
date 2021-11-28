@@ -28,7 +28,7 @@ pub fn fastEncode(dest: *[27]u8, source: *const [20]u8) []const u8 {
         for (bp) |c| {
             var r: u64 = undefined;
             _ = @mulWithOverflow(u64, remainder, srcBase, &r);
-            var value = @as(u64, c) + r;
+            var value = @intCast(u64, c) + r;
             var digit = @divFloor(value, dstBase);
             remainder = @mod(value, dstBase);
             if (qidx != 0 or digit != 0) {
@@ -48,7 +48,6 @@ fn base62Value(digit: u8) u8 {
     return switch (digit) {
         '0'...'9' => (digit - '0'),
         'A'...'Z' => offsetUppercase + (digit - 'A'),
-        //else => offsetLowercase + (digit - 'a'),
         else => blk: {
             var r: u8 = undefined;
             _ = @subWithOverflow(u8, digit, 'a', &r);
@@ -77,7 +76,7 @@ pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
         for (bp) |c| {
             var r: u64 = undefined;
             _ = @mulWithOverflow(u64, remainder, srcBase, &r);
-            var value = @as(u64, c) + r;
+            var value = @intCast(u64, c) + r;
             var digit = @divFloor(value, dstBase);
             remainder = @mod(value, dstBase);
             if (qidx != 0 or digit != 0) {
@@ -86,9 +85,8 @@ pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
             }
         }
 
-        if (n < 4) {
-            // errShortBuffer
-        }
+        // errShortBuffer
+        std.debug.assert(n >= 4);
 
         dest[n - 4] = @truncate(u8, remainder >> 24);
         dest[n - 3] = @truncate(u8, remainder >> 16);

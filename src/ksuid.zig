@@ -3,6 +3,10 @@ const t = std.testing;
 const base62 = @import("./base62.zig");
 const Nil = KSUID{};
 
+pub const Error = error{
+    InvalidLength,
+};
+
 pub const KSUID = struct {
     const Self = @This();
     pub const epochStamp: i64 = 1400000000;
@@ -35,8 +39,9 @@ pub const KSUID = struct {
     }
 
     pub fn parse(data: []const u8) !KSUID {
+        if (data.len < 27) { return error.InvalidLength; }
         var k = KSUID{};
-        _ = base62.fastDecode(&k.data, data[0..27]);
+        _ = try base62.fastDecode(&k.data, data[0..27]);
         return k;
     }
 
@@ -45,7 +50,7 @@ pub const KSUID = struct {
     }
 
     pub fn fmt(self: *const Self) std.fmt.Formatter(formatKSUID) {
-        return .{.data = self};
+        return .{ .data = self };
     }
 };
 
@@ -74,6 +79,18 @@ test "parse" {
     var buf: [16]u8 = undefined;
     const expected = try std.fmt.hexToBytes(&buf, "E1933E37F275708763ADC7745AF5E7F2");
     try t.expectEqualSlices(u8, expected, a.payload());
+
+    if (KSUID.parse("***************************")) |_| {
+        return error.ExpectedError;
+    } else |err| if (err != error.InvalidCharacter) {
+        return err;
+    }
+
+    if (KSUID.parse("123")) |_| {
+        return error.ExpectedError;
+    } else |err| if (err != error.InvalidLength) {
+        return err;
+    }
 }
 
 test "format" {

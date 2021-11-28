@@ -8,6 +8,10 @@ const offsetUppercase = 10;
 const offsetLowercase = 36;
 const stringEncodedLength = 27;
 
+pub const Error = error{
+    InvalidCharacter,
+};
+
 pub fn fastEncode(dest: *[27]u8, source: *const [20]u8) []const u8 {
     const srcBase = 4294967296;
     const dstBase = 62;
@@ -44,26 +48,23 @@ pub fn fastEncode(dest: *[27]u8, source: *const [20]u8) []const u8 {
     return dest[0..27];
 }
 
-fn base62Value(digit: u8) u8 {
+fn base62Value(digit: u8) !u8 {
     return switch (digit) {
         '0'...'9' => (digit - '0'),
         'A'...'Z' => offsetUppercase + (digit - 'A'),
-        else => blk: {
-            var r: u8 = undefined;
-            _ = @subWithOverflow(u8, digit, 'a', &r);
-            break :blk offsetLowercase + r;
-        },
+        'a'...'z' => offsetLowercase + (digit - 'a'),
+        else => error.InvalidCharacter,
     };
 }
 
-pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
+pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) ![]const u8 {
     const srcBase = 62;
     const dstBase = 4294967296;
 
     var parts: [27]u8 = undefined;
     var i: usize = 0;
     for (parts) |_| {
-        parts[i] = base62Value(source[i]);
+        parts[i] = try base62Value(source[i]);
         i += 1;
     }
     var n = dest.len;
@@ -100,13 +101,23 @@ pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
     std.mem.copy(u8, dest[0..n], zero[0..n]);
     return dest[0..20];
 }
+
 test "base62" {
     var decoded: [20]u8 = undefined;
-    _ = fastDecode(&decoded, "0ujtsYcgvSTl8PAuAdqWYSMnLOv");
+    _ = try fastDecode(&decoded, "0ujtsYcgvSTl8PAuAdqWYSMnLOv");
     //std.debug.print("dec[{s}]\n", .{std.fmt.fmtSliceHexUpper(&decoded)});
     var outbuf: [27]u8 = undefined;
     var toEnc = try std.fmt.hexToBytes(&outbuf, "0669F7EFB5A1CD34B5F99D1154FB6853345C9735");
     var outEncBuf: [27]u8 = undefined;
     const outEnc = fastEncode(&outEncBuf, toEnc[0..20]);
     //std.debug.print("enc[{s}]\n", .{outEnc});
+}
+
+test "invalid" {
+    var decoded: [20]u8 = undefined;
+    if (fastDecode(&decoded, "$$$$$$$$$$$$$$$$$$$$$$$$$$$")) |_| {
+        return error.ExpectedError;
+    } else |err| if (err != error.InvalidCharacter) {
+        return err;
+    }
 }

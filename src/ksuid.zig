@@ -3,7 +3,7 @@ const t = std.testing;
 const base62 = @import("./base62.zig");
 const Nil = KSUID{};
 
-const KSUID = struct {
+pub const KSUID = struct {
     const Self = @This();
     pub const epochStamp: i64 = 1400000000;
 

@@ -13,11 +13,11 @@ pub fn fastEncode(dest: *[27]u8, source: *const [20]u8) []const u8 {
     const dstBase = 62;
     std.debug.assert(source.len == 20);
     var parts = [5]u32{
-        std.mem.readInt(u32, source[0..4], std.builtin.Endian.Big),
-        std.mem.readInt(u32, source[4..8], std.builtin.Endian.Big),
-        std.mem.readInt(u32, source[8..12], std.builtin.Endian.Big),
-        std.mem.readInt(u32, source[12..16], std.builtin.Endian.Big),
-        std.mem.readInt(u32, source[16..20], std.builtin.Endian.Big),
+        std.mem.readIntBig(u32, source[0..4]),
+        std.mem.readIntBig(u32, source[4..8]),
+        std.mem.readIntBig(u32, source[8..12]),
+        std.mem.readIntBig(u32, source[12..16]),
+        std.mem.readIntBig(u32, source[16..20]),
     };
     var n = dest.len;
     var bp: []u32 = parts[0..];
@@ -102,24 +102,13 @@ pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) []const u8 {
     std.mem.copy(u8, dest[0..n], zero[0..n]);
     return dest[0..20];
 }
-test "encodeBase62" {
+test "base62" {
     var decoded: [20]u8 = undefined;
-    //decodeBase62(&decoded, encoded);
-    //std.debug.print("dec[{s}]\n", .{decoded});
-
-    //decodeBase62(&decoded, "0ujzPyRiIAffKhBux4PvQdDqMHY");
-    //std.debug.print("dec[{s}]\n", .{std.fmt.fmtSliceHexUpper(&decoded)});
-
-    //decodeBase62(&decoded, "1srOrx2ZWZBpBUvZwXKQmoEYga2");
-    //std.debug.print("dec[{s}]\n", .{std.fmt.fmtSliceHexUpper(&decoded)});
-
     _ = fastDecode(&decoded, "0ujtsYcgvSTl8PAuAdqWYSMnLOv");
-    std.debug.print("dec[{s}]\n", .{std.fmt.fmtSliceHexUpper(&decoded)});
-    // 0669F7EFB5A1CD34B5F99D1154FB6853345C9735
-
+    //std.debug.print("dec[{s}]\n", .{std.fmt.fmtSliceHexUpper(&decoded)});
     var outbuf: [27]u8 = undefined;
     var toEnc = try std.fmt.hexToBytes(&outbuf, "0669F7EFB5A1CD34B5F99D1154FB6853345C9735");
     var outEncBuf: [27]u8 = undefined;
     const outEnc = fastEncode(&outEncBuf, toEnc[0..20]);
-    std.debug.print("enc[{s}]\n", .{outEnc});
+    //std.debug.print("enc[{s}]\n", .{outEnc});
 }

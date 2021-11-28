@@ -16,7 +16,6 @@ pub const Error = error{
 pub fn fastEncode(dest: *[27]u8, source: *const [20]u8) []const u8 {
     const srcBase = 4294967296;
     const dstBase = 62;
-    std.debug.assert(source.len == 20);
     var parts = [5]u32{
         std.mem.readIntBig(u32, source[0..4]),
         std.mem.readIntBig(u32, source[4..8]),

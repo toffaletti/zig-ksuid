@@ -10,6 +10,7 @@ const stringEncodedLength = 27;
 
 pub const Error = error{
     InvalidCharacter,
+    DestTooShort,
 };
 
 pub fn fastEncode(dest: *[27]u8, source: *const [20]u8) []const u8 {
@@ -86,8 +87,9 @@ pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) ![]const u8 {
             }
         }
 
-        // errShortBuffer
-        std.debug.assert(n >= 4);
+        if (n < 4) {
+            return error.DestTooShort;
+        }
 
         dest[n - 4] = @truncate(u8, remainder >> 24);
         dest[n - 3] = @truncate(u8, remainder >> 16);

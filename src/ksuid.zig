@@ -91,6 +91,16 @@ test "parse" {
     } else |err| if (err != error.InvalidLength) {
         return err;
     }
+
+    if (KSUID.parse("fffffffffffffffffffffffffff")) |_| {
+        return error.ExpectedError;
+    } else |err| if (err != error.DestTooShort) {
+        return err;
+    }
+
+    const max = try KSUID.parse("aWgEPTl1tmebfsQzFP4bxwgy80V");
+    try t.expectEqual(@as(i64, 5694967295), max.timestamp());
+    try t.expectEqualSlices(u8, &[_]u8{0xff}**16, max.payload());
 }
 
 test "format" {

@@ -43,7 +43,22 @@ const KSUID = struct {
     pub fn format(self: *const Self, dest: *[27]u8) []const u8 {
         return base62.fastEncode(dest, &self.data);
     }
+
+    pub fn fmt(self: *const Self) std.fmt.Formatter(formatKSUID) {
+        return .{.data = self};
+    }
 };
+
+pub fn formatKSUID(
+    ksuid: *const KSUID,
+    comptime fmt: []const u8,
+    options: std.fmt.FormatOptions,
+    writer: anytype,
+) !void {
+    var buf: [27]u8 = undefined;
+    _ = ksuid.format(&buf);
+    try writer.writeAll(&buf);
+}
 
 test "new" {
     const a = KSUID{};
@@ -76,9 +91,16 @@ test "format" {
     }
     // max
     {
-        const a = KSUID{.data = [_]u8{0xff}**20};
+        const a = KSUID{ .data = [_]u8{0xff} ** 20 };
         try t.expectEqualSlices(u8, "aWgEPTl1tmebfsQzFP4bxwgy80V", a.format(&fmtbuf));
     }
+}
+
+test "formatter" {
+    const a = KSUID{};
+    var fmtbuf: [27]u8 = undefined;
+    _ = try std.fmt.bufPrint(&fmtbuf, "{s}", .{a.fmt()});
+    try t.expectEqualSlices(u8, "000000000000000000000000000", &fmtbuf);
 }
 
 test "random" {

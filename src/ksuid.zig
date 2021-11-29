@@ -39,7 +39,9 @@ pub const KSUID = struct {
     }
 
     pub fn parse(data: []const u8) !KSUID {
-        if (data.len < 27) { return error.InvalidLength; }
+        if (data.len < 27) {
+            return error.InvalidLength;
+        }
         var k = KSUID{};
         _ = try base62.fastDecode(&k.data, data[0..27]);
         return k;
@@ -100,7 +102,7 @@ test "parse" {
 
     const max = try KSUID.parse("aWgEPTl1tmebfsQzFP4bxwgy80V");
     try t.expectEqual(@as(i64, 5694967295), max.timestamp());
-    try t.expectEqualSlices(u8, &[_]u8{0xff}**16, max.payload());
+    try t.expectEqualSlices(u8, &[_]u8{0xff} ** 16, max.payload());
 }
 
 test "format" {

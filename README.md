@@ -3,6 +3,8 @@ Zig implementation of [Segment.io's KSUID](https://segment.com/blog/a-brief-hist
 
 # library usage
 
+To generate a KSUID you must provide a `std.rand.Random`. In this example we are using the default cryptographically secure rng provided by the zig std library.
+
 ```zig
     var secret_seed: [std.rand.DefaultCsprng.secret_seed_length]u8 = undefined;
     std.crypto.random.bytes(&secret_seed);
@@ -32,4 +34,11 @@ Inspect a ksuid:
 0ujtsYcgvSTl8PAuAdqWYSMnLOv
  2017-10-09 21:00:47 -0700 PDT
  B5A1CD34B5F99D1154FB6853345C9735
+```
+
+# test coverage
+To generate a coverage report with kcov:
+```
+zig build test -Dcoverage
+open kcov-output/index.html
 ```

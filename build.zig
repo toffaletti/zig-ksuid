@@ -34,6 +34,7 @@ pub fn build(b: *std.build.Builder) void {
     test_step.dependOn(&main_tests.step);
 
     const exe = b.addExecutable("ksuid", "src/main.zig");
+    exe.linkSystemLibrary("c");
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.install();

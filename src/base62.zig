@@ -103,15 +103,23 @@ pub fn fastDecode(dest: *[20]u8, source: *const [27]u8) ![]const u8 {
     return dest[0..20];
 }
 
-test "base62" {
+test "base62 decode" {
     var decoded: [20]u8 = undefined;
-    _ = try fastDecode(&decoded, "0ujtsYcgvSTl8PAuAdqWYSMnLOv");
+    const outDec = try fastDecode(&decoded, "0ujtsYcgvSTl8PAuAdqWYSMnLOv");
+    var outbuf: [27]u8 = undefined;
+    const expected = try std.fmt.hexToBytes(&outbuf, "0669F7EFB5A1CD34B5F99D1154FB6853345C9735");
     //std.debug.print("dec[{s}]\n", .{std.fmt.fmtSliceHexUpper(&decoded)});
+    try t.expectEqualSlices(u8, expected, outDec);
+}
+
+test "base62 encode" {
     var outbuf: [27]u8 = undefined;
     var toEnc = try std.fmt.hexToBytes(&outbuf, "0669F7EFB5A1CD34B5F99D1154FB6853345C9735");
     var outEncBuf: [27]u8 = undefined;
     const outEnc = fastEncode(&outEncBuf, toEnc[0..20]);
+    const expected = "0ujtsYcgvSTl8PAuAdqWYSMnLOv";
     //std.debug.print("enc[{s}]\n", .{outEnc});
+    try t.expectEqualSlices(u8, expected, outEnc);
 }
 
 test "invalid" {

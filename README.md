@@ -9,7 +9,7 @@ To generate a KSUID you must provide a `std.rand.Random`. In this example we are
     var secret_seed: [std.rand.DefaultCsprng.secret_seed_length]u8 = undefined;
     std.crypto.random.bytes(&secret_seed);
     var rand = std.rand.DefaultCsprng.init(secret_seed);
-    const k = KSUID.random(&rand.random);
+    const k = KSUID.random(rand.random());
     try stdout.print("{s}\n", .{k.fmt()});
 ```
 

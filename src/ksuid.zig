@@ -13,12 +13,12 @@ pub const KSUID = struct {
 
     data: [20]u8 = [_]u8{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
-    pub fn random(rand: *std.rand.Random) KSUID {
+    pub fn random(rand: std.rand.Random) KSUID {
         // Get a calendar timestamp, in seconds, relative to UTC 1970-01-01.
         return randomWithTimestamp(rand, std.time.timestamp());
     }
 
-    pub fn randomWithTimestamp(rand: *std.rand.Random, unixTimestamp: i64) KSUID {
+    pub fn randomWithTimestamp(rand: std.rand.Random, unixTimestamp: i64) KSUID {
         var k = KSUID{};
         rand.bytes(k.data[4..]);
         const ts = @intCast(u32, unixTimestamp - epochStamp);
@@ -62,6 +62,8 @@ pub fn formatKSUID(
     options: std.fmt.FormatOptions,
     writer: anytype,
 ) !void {
+    _ = fmt;
+    _ = options;
     var buf: [27]u8 = undefined;
     _ = ksuid.format(&buf);
     try writer.writeAll(&buf);
@@ -134,12 +136,12 @@ test "formatter" {
 
 test "random" {
     var prng = std.rand.DefaultPrng.init(0);
-    const a = KSUID.random(&prng.random);
-    var fmtbuf: [27]u8 = undefined;
+    const a = KSUID.random(prng.random());
+    //var fmtbuf: [27]u8 = undefined;
     //std.debug.print("random[{s}]\n", .{a.format(&fmtbuf)});
     try t.expect(a.timestamp() != 0);
     //std.debug.print("payload[{s}]\n", .{std.fmt.fmtSliceHexUpper(a.payload())});
     var buf: [16]u8 = undefined;
-    const expected = try std.fmt.hexToBytes(&buf, "A333D71CA4469950FA4B93B167568800");
-    try t.expectEqualSlices(u8, &buf, a.payload());
+    const expected = try std.fmt.hexToBytes(&buf, "DF230B49615D175307D580C33D6FDA61");
+    try t.expectEqualSlices(u8, expected, a.payload());
 }

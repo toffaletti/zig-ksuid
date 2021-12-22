@@ -35,7 +35,7 @@ pub fn main() anyerror!void {
     std.crypto.random.bytes(&secret_seed);
     var rand = std.rand.DefaultCsprng.init(secret_seed);
     while (count > 0) : (count -= 1) {
-        const k = ksuid.KSUID.random(&rand.random);
+        const k = ksuid.KSUID.random(rand.random());
         try stdout.print("{s}\n", .{k.fmt()});
     }
 }
